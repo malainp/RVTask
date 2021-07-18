@@ -6,8 +6,12 @@ import com.google.android.material.appbar.CollapsingToolbarLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.Glide
 import com.example.encoratask.dummy.DummyContent
+import com.example.encoratask.models.Character
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * A fragment representing a single Item detail screen.
@@ -15,23 +19,27 @@ import com.example.encoratask.dummy.DummyContent
  * in two-pane mode (on tablets) or a [ItemDetailActivity]
  * on handsets.
  */
+@AndroidEntryPoint
 class ItemDetailFragment : Fragment() {
 
     /**
      * The dummy content this fragment is presenting.
      */
-    private var item: DummyContent.DummyItem? = null
+    private var item: Character? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         arguments?.let {
             if (it.containsKey(ARG_ITEM_ID)) {
-                // Load the dummy content specified by the fragment
-                // arguments. In a real-world scenario, use a Loader
-                // to load content from a content provider.
-                item = DummyContent.ITEM_MAP[it.getString(ARG_ITEM_ID)]
-                activity?.findViewById<CollapsingToolbarLayout>(R.id.toolbar_layout)?.title = item?.content
+                item = it.getSerializable(ARG_ITEM_ID) as Character
+                activity?.findViewById<CollapsingToolbarLayout>(R.id.toolbar_layout)?.title = item?.name
+                val iv = activity?.findViewById<ImageView>(R.id.iv_char_image)
+                iv?.let { ivsafe ->
+                    Glide.with(requireActivity())
+                        .load(item?.image)
+                        .into(ivsafe)
+                }
             }
         }
     }
@@ -42,7 +50,7 @@ class ItemDetailFragment : Fragment() {
 
         // Show the dummy content as text in a TextView.
         item?.let {
-            rootView.findViewById<TextView>(R.id.item_detail).text = it.details
+            rootView.findViewById<TextView>(R.id.tv_char_name).text = "Specie: ${it.species}\nGender: ${it.gender}\nStatus: ${it.status}"
         }
 
         return rootView
@@ -54,5 +62,6 @@ class ItemDetailFragment : Fragment() {
          * represents.
          */
         const val ARG_ITEM_ID = "item_id"
+        const val ARG_NAME = "name"
     }
 }
